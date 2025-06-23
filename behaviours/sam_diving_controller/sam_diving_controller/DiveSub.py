@@ -16,7 +16,7 @@ from sensor_msgs.msg import Imu
 from smarc_msgs.msg import PercentStamped, ThrusterRPM, ThrusterFeedback
 from smarc_control_msgs.msg import Topics as ControlTopics
 from sam_msgs.msg import Topics as SamTopics
-from sam_msgs.msg import ThrusterAngles
+from sam_msgs.msg import ThrusterAngles, ThrusterRPMs
 from dead_reckoning_msgs.msg import Topics as DRTopics
 
 from tf2_ros import TransformException
@@ -91,12 +91,22 @@ class DiveSub():
         self.depth_sub = node.create_subscription(msg_type=PoseWithCovarianceStamped, topic=DRTopics.DR_DEPTH_POSE_TOPIC, callback=self._depth_cb, qos_profile=10)
         self.pitch_sub = node.create_subscription(msg_type=Imu, topic=ControlTopics.PITCH, callback=self._pitch_cb, qos_profile=10)
 
+
+        # Test of subscribers - excluding ctrl_synch_msg
+        self.lcg_fb = node.create_subscription(msg_type=PercentStamped, topic=SamTopics.LCG_FB_TOPIC, callback=self._lcg_cb, qos_profile=10)
+        self.vbs_fb = node.create_subscription(msg_type=PercentStamped, topic=SamTopics.VBS_FB_TOPIC, callback=self._vbs_cb, qos_profile=10)
+        # self.rpm1_fb = node.create_subscription(msg_type=ThrusterRPM, topic=SamTopics.THRUSTER1_CMD_TOPIC, callback=self._lcg_cb, qos_profile=10)
+        # self.rpm2_fb = node.create_subscription(msg_type=ThrusterRPM, topic=SamTopics.THRUSTER2_CMD_TOPIC, callback=self._lcg_cb, qos_profile=10)
+        self.combined_rpms_fb = node.create_subscription(msg_type=ThrusterRPMs, topic="core/thruster_rpms_cmd", callback=self._rpms_cb, qos_profile=10)
+        self.thrust_vector_fb = node.create_subscription(msg_type=ThrusterAngles, topic=SamTopics.THRUST_VECTOR_CMD_TOPIC, callback=self._thrust_vector_cb, qos_profile=10)
+
+
         # Synch subscribers here 
-        self.lcg_fb = Subscriber(self._node, PercentStamped, SamTopics.LCG_FB_TOPIC)
-        self.vbs_fb = Subscriber(self._node, PercentStamped, SamTopics.VBS_FB_TOPIC)
-        self.rpm1_fb = Subscriber(self._node, ThrusterFeedback, SamTopics.THRUSTER1_FB_TOPIC)
-        self.rpm2_fb = Subscriber(self._node, ThrusterFeedback, SamTopics.THRUSTER2_FB_TOPIC)
-        self.thrust_vector_fb = Subscriber(self._node, ThrusterAngles, SamTopics.THRUST_VECTOR_CMD_TOPIC)
+        # self.lcg_fb = Subscriber(self._node, PercentStamped, SamTopics.LCG_FB_TOPIC)
+        # self.vbs_fb = Subscriber(self._node, PercentStamped, SamTopics.VBS_FB_TOPIC)
+        # self.rpm1_fb = Subscriber(self._node, ThrusterFeedback, SamTopics.THRUSTER1_FB_TOPIC)
+        # self.rpm2_fb = Subscriber(self._node, ThrusterFeedback, SamTopics.THRUSTER2_FB_TOPIC)
+        # self.thrust_vector_fb = Subscriber(self._node, ThrusterAngles, SamTopics.THRUST_VECTOR_CMD_TOPIC)
 
         #self.ctrl_synch_msg = ApproximateTimeSynchronizer(
         #    [self.vbs_fb, self.lcg_fb, self.rpm1_fb, self.rpm2_fb, self.thrust_vector_fb],
