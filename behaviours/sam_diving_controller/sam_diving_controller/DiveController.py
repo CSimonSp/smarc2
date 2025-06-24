@@ -10,7 +10,7 @@ import csv
 
 from smarc_control_msgs.msg import ControlError, ControlInput, ControlReference, ControlState
 
-from .ParamUtils import DivingModelParam
+#from .ParamUtils import DivingModelParam
 from .IDivePub import MissionStates, ActuatorStates
 
 from smarc_modelling.vehicles.SAM_casadi import SAM_casadi
@@ -499,7 +499,7 @@ class DepthJoyControllerPID(DiveControllerInterface):
 
 class DiveControllerMPC(DiveControllerInterface):
 
-    def __init__(self, node, dive_pub, dive_sub, rate=0.1):
+    def __init__(self, node, dive_pub, dive_sub, param, rate=0.1):
 
         self._node = node
         self._dive_sub = dive_sub 
@@ -509,13 +509,13 @@ class DiveControllerMPC(DiveControllerInterface):
 
         super().__init__(self._node, self._dive_pub, self._dive_sub, self._dt)
 
-        self.param = DivingModelParam(self._node).get_param()
+        self.param = param
         # FIXME: This needs to be fixed. Acados places the generated C files in
         # the current directory. So we litter the whole ros workspace with
         # them. Not good, but all attempts to force it to use a specific
         # directory failed so far.
 
-        # Flag if you want to build the OCP or not
+        # Flag if you want to rebuild the OCP or not (if changes has been made to the MPC)
         build = False # NOTE: Don't change until the previous fixme is resolved.
         self.acados_dir = f"{Path(__file__).resolve().parents[0]}" 
 
@@ -540,7 +540,7 @@ class DiveControllerMPC(DiveControllerInterface):
         self.nu = self.nmpc.nu        # Control derivative vector length
 
         
-        self.ref_is_traj = False
+        self.ref_is_traj = True
         difficulty = 'easy'
         if self.ref_is_traj:
             # load trajectory - Replace with your actual file path

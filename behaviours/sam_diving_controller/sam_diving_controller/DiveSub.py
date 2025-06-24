@@ -147,15 +147,34 @@ class DiveSub():
         self._pitch = rpy[1]
 
     def _ctrl_synch_cb(self, vbs_fb_msg: PercentStamped, lcg_fb_msg: PercentStamped,
-                       rpm1_fb_msg: ThrusterRPM, rpm2_fb_msg: ThrusterRPM, 
+                       combined_rpms_fb: ThrusterRPMs,
                        thrust_vector_fb_msg: ThrusterAngles):
         self._control_input['vbs'] = vbs_fb_msg.value
         self._control_input['lcg'] = lcg_fb_msg.value
-        self._control_input['rpm1'] = rpm1_fb_msg.rpm.rpm
-        self._control_input['rpm2'] = rpm2_fb_msg.rpm.rpm
+        self._control_input['rpm1'] = combined_rpms_fb.thruster_1_rpm
+        self._control_input['rpm2'] = combined_rpms_fb.thruster_2_rpm
         self._control_input['stern'] = thrust_vector_fb_msg.thruster_vertical_radians
         self._control_input['rudder'] = thrust_vector_fb_msg.thruster_horizontal_radians
 
+    # Control input callbacks added for testing
+    def _vbs_cb(self, vbs_fb_msg: PercentStamped):
+        #self._loginfo(f"vbs: {vbs_fb_msg.header.stamp}")
+        self._control_input['vbs'] = vbs_fb_msg.value
+
+    def _lcg_cb(self, lcg_fb_msg: PercentStamped):
+        #self._loginfo(f"lcg: {lcg_fb_msg.header.stamp}")
+        self._control_input['lcg'] = lcg_fb_msg.value
+
+    def _rpms_cb(self, combined_rpms_fb: ThrusterRPMs):
+        #self._loginfo(f"rpms: {combined_rpms_fb.header.stamp}")
+        self._control_input['rpm1'] = combined_rpms_fb.thruster_1_rpm
+        self._control_input['rpm2'] = combined_rpms_fb.thruster_2_rpm 
+
+    def _thrust_vector_cb(self, thrust_vector_fb_msg: ThrusterAngles):
+        #self._loginfo(f"Thrust {thrust_vector_fb_msg.header.stamp}")
+        self._control_input['stern'] = thrust_vector_fb_msg.thruster_vertical_radians
+        self._control_input['rudder'] = thrust_vector_fb_msg.thruster_horizontal_radians
+    # ------------------------------------------------------------------------------------
 
     def _update_tf(self):
         if self._waypoint_global is None:

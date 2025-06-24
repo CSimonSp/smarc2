@@ -7,7 +7,7 @@ from std_msgs.msg import Float32, Float64, Bool
 from smarc_msgs.msg import ThrusterRPM, PercentStamped
 from smarc_control_msgs.msg import Topics as ControlTopics
 from sam_msgs.msg import Topics as SamTopics
-from sam_msgs.msg import ThrusterAngles
+from sam_msgs.msg import ThrusterAngles, ThrusterRPMs
 
 from sam_diving_controller.IDivePub import ActuatorStates
 
@@ -35,6 +35,7 @@ class SAMDivePub(IDivePub):
         self._lcg_pub = node.create_publisher(PercentStamped, SamTopics.LCG_CMD_TOPIC, 10)
         self._rpm1_pub = node.create_publisher(ThrusterRPM, SamTopics.THRUSTER1_CMD_TOPIC, 10)
         self._rpm2_pub = node.create_publisher(ThrusterRPM, SamTopics.THRUSTER2_CMD_TOPIC, 10)
+        self.thrust_rpms_pub = node.create_publisher(ThrusterRPMs, "core/thruster_rpms_cmd", qos_profile=10)
         self._thrust_vector_pub = node.create_publisher(ThrusterAngles, SamTopics.THRUST_VECTOR_CMD_TOPIC, 10)
         self._joy_thrust_vector_pub = node.create_publisher(Float64, ControlTopics.ELEVATOR_PID_CTRL, 10)
         self._joy_assisted_driving_pub = node.create_publisher(Bool, ControlTopics.ASSIST_ENABLE, qos_profile=10)
@@ -44,6 +45,7 @@ class SAMDivePub(IDivePub):
         self._lcg_msg = PercentStamped()
         self._t1_msg = ThrusterRPM()
         self._t2_msg = ThrusterRPM()
+        self.rpm_msg = ThrusterRPMs()
         self._thrust_vector_msg = ThrusterAngles()
         self._joy_tv_msg = Float64()
 
