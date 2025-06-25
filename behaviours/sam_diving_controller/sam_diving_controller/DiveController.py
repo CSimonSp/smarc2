@@ -503,13 +503,13 @@ class DiveControllerMPC(DiveControllerInterface):
 
         self._node = node
         self._dive_sub = dive_sub 
-        self._dive_pub = dive_pub  
+        self._dive_pub = dive_pub 
+        self.param = param 
         self._dt = rate
 
 
         super().__init__(self._node, self._dive_pub, self._dive_sub, self._dt)
 
-        self.param = param
         # FIXME: This needs to be fixed. Acados places the generated C files in
         # the current directory. So we litter the whole ros workspace with
         # them. Not good, but all attempts to force it to use a specific
@@ -534,11 +534,10 @@ class DiveControllerMPC(DiveControllerInterface):
 
         # create ocp object to formulate the OCP
         Ts = 0.1            # Sampling time
-        self.N_horizon = 16 # Prediction horizon
+        self.N_horizon = 10 # Prediction horizon
         self.nmpc = NMPC(sam, Ts, self.N_horizon, update_solver_settings=build)
         self.nx = self.nmpc.nx        # State vector length + control vector
         self.nu = self.nmpc.nu        # Control derivative vector length
-
         
         self.ref_is_traj = True
         difficulty = 'easy'
@@ -592,12 +591,11 @@ class DiveControllerMPC(DiveControllerInterface):
 
         return np.array(data)
 
-
     def update(self):
         """
         This is where all the magic happens.
         """
-        
+        self._loginfo(f"HELLOOOO:  {self._initialized} {self.ref_is_traj}")
         if not self._initialized and self.ref_is_traj == True:
             # Declare the initial state based on where the robot is right now
             tmp = self._dive_sub.get_states()
@@ -652,6 +650,8 @@ class DiveControllerMPC(DiveControllerInterface):
                 self.ocp_solver.set(stage, "u", np.zeros(self.nu,))
 
             self._initialized = True
+            self._loginfo(f"After init upd:  {self._initialized} {self.ref_is_traj}")
+
 
         elif self.ref_is_traj == False:
             mission_state = self._dive_sub.get_mission_state()

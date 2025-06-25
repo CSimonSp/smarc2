@@ -80,6 +80,8 @@ class SAMDivePub(IDivePub):
         """
         self._t1_msg.rpm = int(rpm1)
         self._t2_msg.rpm = int(rpm2)
+        self.rpm_msg.thruster_1_rpm = int(rpm1)
+        self.rpm_msg.thruster_2_rpm = int(rpm2)
 
     def set_thrust_vector(self, horizontal_tv: float, vertical_tv: float) -> None:
         """
